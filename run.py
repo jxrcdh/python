@@ -22,8 +22,9 @@ else:
 	print 'too many arguments'
 
 notmatch_info = []
+cancel_orders=[]
 start=clock()
-datas=ipr.process_strs(infos,notmatch_info)
+datas=ipr.process_strs(infos,notmatch_info,cancel_orders)
 finish=clock()
 print finish-start
 
@@ -31,6 +32,7 @@ print len(datas)
 
 start=clock()
 wf.write_err('notmatch_log.dat',notmatch_info)
+wf.write_data_simple('cancel_orders.dat',cancel_orders)
 finish=clock()
 print finish-start
 

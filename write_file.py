@@ -20,6 +20,12 @@ def write_err(path,infos):
 	f=open(path,'w')
 	for info in infos:
 		f.write(info+'\n')
+def write_data_simple(path,infos):
+	f=open(path,'w')
+	for info in infos:
+		for d in info:
+			f.write(str(d)+'\t')
+		f.write('\n')
 def count_combine(comb):
 	res=[[0,0,0,0],[0,0,0,0]]
 	for comb_data in comb:
