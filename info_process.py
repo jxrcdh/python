@@ -1,22 +1,27 @@
 import re
-def infoget(str):
+def infoget(str,re_dict):
 	splitstr=str.split(']')
 	if len(splitstr)>=3:
 		substr = splitstr[2]
 		if len(substr)>0 and substr[0] in mes_type:
 			if substr[0] == '=':
 				if substr[2] == 'E':
-					return get_ems(str)
+					return get_ems(re_dict['E'],str)
+				elif substr[2] == 'O':
+					return get_order(re_dict['O'],str)
 				else:
-					return get_order(str)
+					return ['q']
 			else:
-				return mes_type[substr[0]](str);
+				return mes_type[substr[0]](re_dict[substr[0]],str)
 		else:
 			return ['q']
 	else:
 		return ['q']
-def get_ems(str):
-	m=re.match(ems_info_regex,str)
+count_re=0
+def get_ems(reg,str):
+	m=reg.match(str)
+	global count_re
+	count_re=count_re+1
 	side='0'
 	if m.group(5) >= '1':
 		side='1'
@@ -24,21 +29,30 @@ def get_ems(str):
 	if m.group(6) >= '1':
 		offset='1' 
 	return ['e',m.group(1),m.group(2),m.group(3),m.group(4),side,offset]
-def get_r_info(str):
-	m=re.match(r_info_regex,str)
+def get_r_info(reg,str):
+	m=reg.match(str)
+	global count_re
+	count_re=count_re+1
 	if m is None:
 		return ['q']
 	else:
 		return ['r',m.group(3),m.group(4),m.group(5)]
-def get_t_info(str):
-	m=re.match(t_info_regex,str)
+def get_t_info(reg,str):
+	m=reg.match(str)
+	global count_re	
+	count_re = count_re+1
 	if m is None:
 		return ['q']	
 	else:
 		return ['t',m.group(3),m.group(4)]
-def get_order(str):
-	m=re.match(order_info_regex,str)
-	return ['o',m.group(3),m.group(4),m.group(5),m.group(6),m.group(7),m.group(8)]
+def get_order(reg,str):
+	m=reg.match(str)
+	global count_re	
+	count_re = count_re+1
+	if m is None:
+		return ['q']
+	else:
+		return ['o',m.group(3),m.group(4),m.group(5),m.group(6),m.group(7),m.group(8)]
 mes_type={'=':get_ems,'R':get_r_info,'T':get_t_info}
 ems_info_regex=r'\[\w+\s+?:(\d{2}:\d{2}:\d{2}\.\d+):\w+:\w+\[(\d+)\]:\d+:\d+\]==Ems:(\d+_\d+)\,Local\[(\d+)\]\s+\w+\[\w+\]\,side\[(\d{1})\]\,offset\[(\d{1})\].+$'
 r_info_regex=r'\[\w+\s+?:(\d{2}:\d{2}:\d{2}\.\d+):\w+:\w+\[(\d+)\]:\d+:\d+\]R\s+(\d+)\s+(\d+)\s+(\d+).+$'
@@ -47,8 +61,13 @@ order_info_regex=r'\[\w+\s+?:(\d{2}:\d{2}:\d{2}\.\d+):\w+:\w+\[(\d+)\]:\d+:\d+\]
 def process_strs(infos,notmatch):
 	index=-1
 	savedata=[]
+	re_ems = re.compile(ems_info_regex)
+	re_r = re.compile(r_info_regex)
+	re_t = re.compile(t_info_regex)
+	re_order = re.compile(order_info_regex)
+	re_dict={'E':re_ems,'R':re_r,'T':re_t,'O':re_order}
 	for str in infos:
-		datas=infoget(str)
+		datas=infoget(str,re_dict)
 		if datas[0] == 'e':
 			datas.append('1')
 			datas.append('')
@@ -91,4 +110,5 @@ def process_strs(infos,notmatch):
 		else:
 			zhanwei=[]
 			#print 'nouse'
+	print 'count',count_re
 	return savedata
